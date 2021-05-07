@@ -27,42 +27,51 @@ int main()
 {
 	ledIndicatorInit();
 	motorPwmInit();
-	
+	emergencyButtonInit();
+
 	_delay_ms(3000);
+
 	
 	ledIndicatorActive();
-	
 	running = 1;
+	sei();
 	while(running)
 	{
 		motorControlRight(0, 65535);
 		motorControlLeft(0, 32767);
 		_delay_ms(1000);
-		motorControlRight(0, 32767);
-		motorControlLeft(0, 65535);
-		_delay_ms(2000);
-		motorControlRight(0, 65535);
-		motorControlLeft(0, 32767);
-		_delay_ms(1000);
 		motorControlRight(1, 32767);
-		motorControlLeft(1, 32767);
-		_delay_ms(1000);
+		motorControlLeft(1, 65535);
+		_delay_ms(2000);
+		// motorControlRight(0, 65535);
+		// motorControlLeft(0, 32767);
+		// _delay_ms(1000);
+		// motorControlRight(1, 32767);
+		// motorControlLeft(1, 32767);
+		// _delay_ms(1000);
 	}
 	for(;;);
 }
 
 void emergencyButtonInit()
 {
-	PCMSK0 |= (1<<PCINT0);
-	PCICR |= (1<<PCIE0);
-	sei();
+	PCICR = (1<<PCIE0);
+	PCMSK0 = (1<<PCINT0);
+	PCIFR = (1<<PCIF0);
+	PINB = (1<<PINB0);
 }
 
 void emergencyButton()
 {
+	if(running == 1){
 	motorStop();
 	ledIndicatorIdle();
 	running = 0;
+	}
+	else{
+		running = 1;
+		ledIndicatorActive();
+	}
 }
 
 void ledIndicatorInit()
@@ -153,5 +162,5 @@ void motorStop()
 
 ISR(PCINT0_vect)
 {
-	if(PINB & (1<<0)) emergencyButton();
+	if(~PINB | (1<<0)) emergencyButton();
 }
