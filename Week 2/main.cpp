@@ -67,10 +67,12 @@ void emergencyButton()
 	motorStop();
 	ledIndicatorIdle();
 	running = 0;
+	_delay_ms(250);
 	}
 	else{
 		running = 1;
 		ledIndicatorActive();
+		
 	}
 }
 
