@@ -26,13 +26,16 @@ unsigned char USART_Receive( void );
 
 int main()
 {
-	char udata;
+	//char udata;
 	int dataint;
 	USART_Init(9600);
 	ledIndicatorInit();
 	_delay_ms(3000);
 	ledIndicatorActive();
 	motorPwmInit();
+
+	int direction = 0;
+	int speed = 0;
 
 	while(1)
 	{
@@ -41,8 +44,9 @@ int main()
 		USART_Transmit(dataint);
 		switch (dataint){
 		case 'w':
-			motorControlLeft(0, 65535);
-			motorControlRight(0, 65535);
+			direction = 0;
+			motorControlLeft(direction, 65535);
+			motorControlRight(direction, 65535);
 			//_delay_ms(1000);
 			ledIndicatorIdle();
 			//USART_Transmit('f');
@@ -53,16 +57,17 @@ int main()
 			//ledIndicatorActive();
 			break;
 		case 's':
-			motorControlLeft(1,32767);
-			motorControlRight(1, 32767);
+			direction = 1;
+			motorControlLeft(direction,32767);
+			motorControlRight(direction, 32767);
 			break;
 		case 'a':
-			motorControlRight(0, 32767);
-			motorControlLeft(0, 0);
+			motorControlRight(direction, 32767);
+			motorControlLeft(direction, 0);
 			break;
 		case 'd':
-			motorControlLeft(0, 32767);
-			motorControlRight(0, 0);
+			motorControlLeft(direction, 32767);
+			motorControlRight(direction, 0);
 			break;
 		default:
 			break;
