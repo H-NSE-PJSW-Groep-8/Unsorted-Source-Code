@@ -21,7 +21,7 @@ void motorStop();
 //void initXbee();
 //
 //xbee_driver xbdh;
-uint8_t running;
+uint8_t running = 1;
 
 int main()
 {
@@ -33,16 +33,16 @@ int main()
 
 	
 	ledIndicatorActive();
-	running = 1;
+	//running = 1;
 	sei();
 	while(running)
 	{
-		motorControlRight(0, 65535);
+		motorControlRight(0, 32767);
 		motorControlLeft(0, 32767);
 		_delay_ms(1000);
-		motorControlRight(1, 32767);
-		motorControlLeft(1, 65535);
-		_delay_ms(2000);
+		motorControlRight(1, 60767);
+		motorControlLeft(1, 60767);
+		_delay_ms(1000);
 		// motorControlRight(0, 65535);
 		// motorControlLeft(0, 32767);
 		// _delay_ms(1000);
@@ -58,7 +58,7 @@ void emergencyButtonInit()
 	PCICR = (1<<PCIE0);
 	PCMSK0 = (1<<PCINT0);
 	PCIFR = (1<<PCIF0);
-	PINB = (1<<PINB0);
+	PINB = (0<<PINB0);
 }
 
 void emergencyButton()
@@ -72,7 +72,7 @@ void emergencyButton()
 	else{
 		running = 1;
 		ledIndicatorActive();
-		
+
 	}
 }
 
@@ -164,5 +164,8 @@ void motorStop()
 
 ISR(PCINT0_vect)
 {
-	if(~PINB | (1<<0)) emergencyButton();
+	if(PINB | (1<<0)) {
+		//_delay_ms(500);
+		emergencyButton();
+	}
 }
