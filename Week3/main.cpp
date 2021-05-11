@@ -10,6 +10,11 @@ void ledIndicatorInit();
 void ledIndicatorActive();
 void ledIndicatorIdle();
 
+void motorPwmInit();
+void motorControlRight(uint8_t dir, uint16_t power);
+void motorControlLeft(uint8_t dir, uint16_t power);
+void motorStop();
+
 void USART_Init( unsigned int baud );
 void USART_Transmit( unsigned char data );
 unsigned char USART_Receive( void );
@@ -22,16 +27,47 @@ unsigned char USART_Receive( void );
 int main()
 {
 	char udata;
+	int dataint;
 	USART_Init(9600);
 	ledIndicatorInit();
 	_delay_ms(3000);
 	ledIndicatorActive();
+	motorPwmInit();
 
 	while(1)
 	{
-		udata = USART_Receive();
-		USART_Transmit(udata);
-		USART_Transmit(udata);
+		ledIndicatorActive();
+		dataint = USART_Receive();
+		USART_Transmit(dataint);
+		switch (dataint){
+		case 'w':
+			motorControlLeft(0, 65535);
+			motorControlRight(0, 65535);
+			//_delay_ms(1000);
+			ledIndicatorIdle();
+			//USART_Transmit('f');
+			break;
+		case 32:
+			motorControlRight(0, 0);
+			motorControlLeft(0, 0);
+			//ledIndicatorActive();
+			break;
+		case 's':
+			motorControlLeft(1,32767);
+			motorControlRight(1, 32767);
+			break;
+		case 'a':
+			motorControlRight(0, 32767);
+			motorControlLeft(0, 0);
+			break;
+		case 'd':
+			motorControlLeft(0, 32767);
+			motorControlRight(0, 0);
+			break;
+		default:
+			break;
+		}
+
 	}
 	for(;;);
 }
@@ -89,6 +125,55 @@ void ledIndicatorIdle()
 {
 	TC4H = 244>>8;
 	OCR4A = (uint8_t)244;
+}
+
+void motorPwmInit()
+{
+	// timer init PWM_freq = clk_io / (prescaler * TOP)
+	ICR1 = 0xFFFF;
+	TCCR1A |= (1<<WGM11);
+	TCCR1B |= (1<<WGM13) | (1<<WGM12) | (1<<CS10); // 244Hz-PWM
+	
+	// init gpio
+	DDRB |= (1<<6) | (1<<5) | (1<<2) | (1<<1);
+}
+
+void motorControlRight(uint8_t dir, uint16_t power)
+{
+	if(dir) PORTB |= (1<<1);
+	else PORTB &= ~(1<<1);
+	
+	if(power)
+	{
+		TCCR1A |= (1<<COM1A1);
+		OCR1A = power;
+	}
+	else
+	{
+		TCCR1A &= ~(1<<COM1A1);
+	}
+}
+
+void motorControlLeft(uint8_t dir, uint16_t power)
+{
+	if(dir) PORTB |= (1<<2);
+	else PORTB &= ~(1<<2);
+	
+	if(power)
+	{
+		TCCR1A |= (1<<COM1B1);
+		OCR1B = power;
+	}
+	else
+	{
+		TCCR1A &= ~(1<<COM1B1);
+	}
+}
+
+void motorStop()
+{
+	motorControlRight(0, 0);
+	motorControlLeft(0, 0);
 }
 
 // ISR(PCINT0_vect)
