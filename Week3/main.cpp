@@ -69,12 +69,17 @@ int main()
 			break;
 			case 's':
 			//x--;
-			if(speed > 0){
+			if (direction == 0){
 				direction = 0;
-				speed = speed - 16384;
+				speed = speed/2;
+				x--;
+			}
+			if (speed <= 8192){
+				motorStop();
+				speed = 0;
 				x = 0;
 			}
-			else {
+			if (speed == 0){
 				direction = 1;
 				speed = 32767;
 			}
