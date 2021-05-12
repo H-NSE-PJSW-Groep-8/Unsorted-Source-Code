@@ -19,6 +19,13 @@ void USART_Init( unsigned int baud );
 void USART_Transmit( unsigned char data );
 unsigned char USART_Receive( void );
 
+int setSpeed(unsigned int j);
+
+void emergencyButtonInit();
+
+int direction = 0;
+uint16_t speed = 0;
+uint16_t x = 0;
 
 //void initXbee();
 //
@@ -33,43 +40,64 @@ int main()
 	_delay_ms(3000);
 	ledIndicatorActive();
 	motorPwmInit();
+	emergencyButtonInit();
 
-	int direction = 0;
-	int speed = 0;
+	sei();
 
 	while(1)
 	{
 		ledIndicatorActive();
 		dataint = USART_Receive();
-		USART_Transmit(dataint);
+		//USART_Transmit(dataint);
 		switch (dataint){
-		case 'w':
+			case 'w':
+			x++;
 			direction = 0;
-			motorControlLeft(direction, 65535);
-			motorControlRight(direction, 65535);
+			speed = setSpeed(x);
+			motorControlLeft(direction, speed);
+			motorControlRight(direction, speed);
 			//_delay_ms(1000);
-			ledIndicatorIdle();
+			//ledIndicatorIdle();
 			//USART_Transmit('f');
 			break;
-		case 32:
+			case 32:
+			speed = 0;
+			x = 0;
 			motorControlRight(0, 0);
 			motorControlLeft(0, 0);
 			//ledIndicatorActive();
 			break;
-		case 's':
-			direction = 1;
-			motorControlLeft(direction,32767);
-			motorControlRight(direction, 32767);
+			case 's':
+			//x--;
+			if(speed > 0){
+				direction = 0;
+				speed = speed - 16384;
+				x = 0;
+			}
+			else {
+				direction = 1;
+				speed = 32767;
+			}
+			//speed = setSpeed(x);
+			motorControlLeft(direction, speed);
+			motorControlRight(direction, speed);
 			break;
-		case 'a':
-			motorControlRight(direction, 32767);
-			motorControlLeft(direction, 0);
+			case 'a':
+			//speed = setSpeed(x);
+			motorControlRight(direction, speed);
+			speed = speed/2;
+			motorControlLeft(direction, speed);
 			break;
-		case 'd':
-			motorControlLeft(direction, 32767);
-			motorControlRight(direction, 0);
+			case 'd':
+			//speed = setSpeed(x);
+			motorControlLeft(direction, speed);
+			speed = speed/2;
+			motorControlRight(direction, speed);
 			break;
-		default:
+			// case '1':
+			// 	x = 32767/2;
+			// 	speed = x;
+			default:
 			break;
 		}
 
@@ -77,9 +105,13 @@ int main()
 	for(;;);
 }
 
-// void USART_Init(){
-// UBRRn = 103; //baud rate van 9600 bps
-// }
+void emergencyButtonInit()
+{
+	PCICR = (1<<PCIE0);
+	PCMSK0 = (1<<PCINT0);
+	PCIFR = (1<<PCIF0);
+	PINB = (0<<PINB0);
+}
 
 void USART_Init( unsigned int baud ){
 	/* Set baud rate */
@@ -179,6 +211,36 @@ void motorStop()
 {
 	motorControlRight(0, 0);
 	motorControlLeft(0, 0);
+}
+
+int setSpeed(unsigned int j){
+	switch (j){
+		case 0:
+		return 0;
+		break;
+		case 1:
+		return 65535/4;
+		break;
+		case 2:
+		return 65535/2;
+		break;
+		case 3:
+		return (65535/4)*3;
+		break;
+		//case 4:
+		//	return 65535;
+		//	break;
+		default:
+		x = 0;
+		break;
+	}
+	return 0;
+}
+
+ISR(USART1_RX_vect){
+	if(UDR1 == '1'){
+		speed = 65535;
+	}
 }
 
 // ISR(PCINT0_vect)

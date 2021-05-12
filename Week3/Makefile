@@ -1,4 +1,4 @@
-PORT=COM3
+PORT=COM6
 MCU=atmega32u4
 CFLAGS = -mmcu=$(MCU)   -Wall -Os
 CC = avr-gcc
