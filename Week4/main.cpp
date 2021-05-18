@@ -5,6 +5,9 @@
 
 //#include "XBEE_driver.h"
 #include "mrBeen.h"
+//#include <usart.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 //void emergencyButtonInit();
 //void emergencyButton();
@@ -21,35 +24,57 @@ void motorControlRight(uint8_t dir, uint16_t power);
 void motorControlLeft(uint8_t dir, uint16_t power);
 void motorStop();
 
+void USART_Init();
+void USART_Transmit(char data);
+uint8_t USART_Receive();
+
 uint8_t running = 1;
 static volatile uint16_t count;
+
+void writeString(char st[]){
+	for(uint8_t i = 0; st[i] !=0; i++){
+		USART_Transmit(st[i]);
+	}
+}
+
+void writeInt(int i){
+	char buffer[8];
+	itoa(i, buffer, 10);
+	writeString(buffer);
+}
+
 
 int main()
 {
 	ledIndicatorInit();
 	motorPwmInit();
 	//emergencyButtonInit();
+	USART_Init();
 	
 	initEncoder();
-	sei();
 	
 	_delay_ms(3000);
-	
-	ledIndicatorActive();
+	sei();
+	//ledIndicatorActive();
 
 	
 	while(running)
 	{
-		motorControlRight(0, 32767);
-		motorControlLeft(0, 32767);
-		
+		motorControlRight(0, 8192);
+		motorControlLeft(0, 8192);
+		if(count % 500 == 0){
+		writeInt(count/100);
+		writeString(" Cm");
+		USART_Transmit('\n');
+		USART_Transmit('\r');
+		}
 		//if(count > 200){
 		//motorStop();
 		//_delay_ms(6000);
 		//count = 0;
 		//}
 	}
-	for(;;);
+	//for(;;);
 }
 
 void initEncoder(){
@@ -57,14 +82,13 @@ void initEncoder(){
 	PCMSK0 = (1<<PCINT4);
 	PCIFR = (1<<PCIF0);
 	
-	PORTB = (1<<PORTB4);
+	PINB = (0<<PINB4);
 	count = 0;
 }
 
 void dist()
 {
 	count += 1;
-
 }
 
 
@@ -164,10 +188,35 @@ void motorStop()
 	motorControlLeft(0, 0);
 }
 
+void USART_Init(){
+	/* Set baud rate */
+	UBRR1 = 103;
+	// UBRR1H = (unsigned char)(baud>>8);
+	// UBRR1L = (unsigned char)baud;
+	/* Enable receiver and transmitter */
+	UCSR1B = (1<<RXEN1) | (1<<TXEN1);
+	/* Set frame format: 8data, 1 stop bit */
+	UCSR1C = (0<<USBS1) | (1<<UCSZ10) | (1<<UCSZ11) | (0<<UCSZ12);
+}
+
+void USART_Transmit(char data){
+	/* Wait for empty transmit buffer */
+	while (~UCSR1A & (1<<UDRE1));
+	/* Put data into buffer, sends the data */
+	UDR1 = data;
+}
+
+uint8_t USART_Receive(){
+	/* Wait for data to be received */
+	while(~UCSR1A & (1<<RXC1));
+	/* Get and return received data from buffer */
+	return UDR1;
+}
+
 ISR(PCINT0_vect) //left encoder XOR
 {
 	if(PINB | (1<<4)) {
-		_delay_ms(50);
+		//_delay_ms(50);
 		dist();
 	}
 }
