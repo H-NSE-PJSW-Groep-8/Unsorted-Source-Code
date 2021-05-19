@@ -5,6 +5,7 @@
 
 //#include "XBEE_driver.h"
 #include "mrBeen.h"
+#include <usart.h>
 
 void ledIndicatorInit();
 void ledIndicatorActive();
@@ -14,10 +15,6 @@ void motorPwmInit();
 void motorControlRight(uint8_t dir, uint16_t power);
 void motorControlLeft(uint8_t dir, uint16_t power);
 void motorStop();
-
-void USART_Init( unsigned int baud );
-void USART_Transmit( unsigned char data );
-unsigned char USART_Receive( void );
 
 int setSpeed(unsigned int j);
 
@@ -42,13 +39,14 @@ int main()
 	motorPwmInit();
 	emergencyButtonInit();
 
+
 	sei();
 
 	while(1)
 	{
 		ledIndicatorActive();
 		dataint = USART_Receive();
-		//USART_Transmit(dataint);
+		USART_Transmit(dataint);
 		switch (dataint){
 			case 'w':
 			x++;
@@ -116,34 +114,6 @@ void emergencyButtonInit()
 	PCMSK0 = (1<<PCINT0);
 	PCIFR = (1<<PCIF0);
 	PINB = (0<<PINB0);
-}
-
-void USART_Init( unsigned int baud ){
-	/* Set baud rate */
-	UBRR1 = 103;
-	// UBRR1H = (unsigned char)(baud>>8);
-	// UBRR1L = (unsigned char)baud;
-	/* Enable receiver and transmitter */
-	UCSR1B = (1<<RXEN1)|(1<<TXEN1);
-	/* Set frame format: 8data, 1 stop bit */
-	UCSR1C = (0<<USBS1)|(1<<UCSZ10) | (1<<UCSZ11) | (0<<UCSZ12);
-}
-
-void USART_Transmit( unsigned char data )
-{
-	/* Wait for empty transmit buffer */
-	while ( !( UCSR1A & (1<<UDRE1)) );
-	/* Put data into buffer, sends the data */
-	UDR1 = data;
-}
-
-unsigned char USART_Receive( void )
-{
-	/* Wait for data to be received */
-	while ( !(UCSR1A & (1<<RXC1)) )
-	;
-	/* Get and return received data from buffer */
-	return UDR1;
 }
 
 void ledIndicatorInit()

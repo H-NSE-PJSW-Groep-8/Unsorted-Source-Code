@@ -1,8 +1,8 @@
-PORT=COM6
+PORT=COM3
 MCU=atmega32u4
 CFLAGS = -mmcu=$(MCU)   -Wall -Os
 CC = avr-gcc
-SRC= main.cpp  mrBeen.cpp
+SRC= Main2.cpp  mrBeen.cpp
 #SRC= main.c 
 OBJ= $(SRC:.c=.o)
 TARGET = zumo
