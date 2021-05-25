@@ -14,6 +14,7 @@
 
 void initEncoder();
 void dist();
+void makeTurn();
 
 void ledIndicatorInit();
 void ledIndicatorActive();
@@ -30,6 +31,24 @@ uint8_t USART_Receive();
 
 uint8_t running = 1;
 static volatile uint16_t count;
+
+void makeTurn(int a){						// a = # of angles figure should make
+	int angle = (int)3330/a;				// 3330 = # of counts to make 360-degrees turn
+	if (tempCount == 0){					//make turn
+		motorControlRight(1, 16384);
+		motorControlLeft(0, 16384);
+		zetGeleLedAan();
+		tempCount = count;
+	}
+	if (tempCount + angle <= count){		//drive straight
+		zetGeleLedUit();
+		motorControlRight(0, 16384);
+		motorControlLeft(0, 16384);
+	}
+	if (tempCount + 2408 + angle <=  count){	
+		tempCount = 0;
+	}
+}
 
 void writeString(char st[]){
 	for(uint8_t i = 0; st[i] !=0; i++){
