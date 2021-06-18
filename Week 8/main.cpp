@@ -10,7 +10,7 @@
 #include "USARTcode.cpp"
 #include "Encoder.cpp"
 #include "Motor.cpp"
-#incldue "Windrichting.cpp"
+#include "Windrichting.cpp"
 
 void Gyro();
 void checkTurning();
@@ -47,7 +47,8 @@ int main()
 	{
 		sendDistance();
 		Gyro();
-		wind();
+		checkTurning();
+		writeWind();
 
 		//dataint = USART_Receive();
 		//USART_Transmit(dataint);
