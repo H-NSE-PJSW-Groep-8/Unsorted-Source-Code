@@ -10,8 +10,10 @@
 #include "USARTcode.cpp"
 #include "Encoder.cpp"
 #include "Motor.cpp"
+#incldue "Windrichting.cpp"
 
 void Gyro();
+void checkTurning();
 
 uint16_t setDuty(int8_t speed);
 
@@ -24,36 +26,7 @@ uint16_t encoderb = 0;
 uint8_t dataint = 0;
 int8_t direction = 0;
 
-int8_t rightturn = 0;
-int8_t leftturn = 0;
-int8_t windrichting = 0;
 
-void writeWind(int8_t i){
-	if (i == 0){
-		writeString("noord");
-	}
-	if (i == 1){
-		writeString("oost");
-	}
-	if (i == 2){
-		writeString("zuid");
-	}
-	if (i == 3){
-		writeString("west");
-	}
-}
-
-void wind(){
-		if (rightturn > 35){
-			windrichting++;
-			rightturn = 0;
-		}
-		if (leftturn > 35){
-			windrichting--;
-			leftturn = 0;
-		}
-		writeWind(windrichting%4);
-}
 
 int main()
 {
@@ -163,6 +136,15 @@ int main()
 	}
 }
 
+void checkTurning(){
+	if (direction != 0){
+		turning = 1;
+	}
+	else{
+		turning = 0;
+	}
+}
+
 void Gyro(){
 			writeString("Gyro = { ");
 				
@@ -176,12 +158,7 @@ void Gyro(){
 
 				gyroRead(SDS1307_GYRO_Z_H);
 				writeInt(data_Read);
-				if(data_Read > 100){
-					rightturn++;
-				}
-				if(data_Read > 20 & data_Read < 30){
-					leftturn++;
-				}
+				gyro_z = data_Read;
 				writeString(" ");
 				
 			writeString("}\n\r");
