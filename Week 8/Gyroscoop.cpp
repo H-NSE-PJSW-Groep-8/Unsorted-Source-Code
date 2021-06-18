@@ -32,8 +32,13 @@
 #define compass_out_y_H		0x0B
 #define compass_out_z_H		0x0D
 #define compass_ctrl_M		0x12
+#define compass_ctrl_3		0x22
 #define compass_ctrl_4		0x23
+#define compass_ctrl_5		0x24
+#define compass_ctrl_6		0x25
+#define compass_ctrl_7		0x26
 #define compass_fifo_ctrl	0x2E
+#define compass_whoami		0x0F
 
 //##############################################################################
 // global variables
