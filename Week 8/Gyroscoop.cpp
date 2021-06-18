@@ -25,10 +25,20 @@
 #define SDS1307_GYRO_Z_L	0x2C
 #define SDS1307_GYRO_Z_H	0x2D
 
+#define compass_w			0x3A
+#define compass_r			0x3B
+#define compass_ctrl_0		0x1F
+#define compass_out_x_H		0x09
+#define compass_out_y_H		0x0B
+#define compass_out_z_H		0x0D
+#define compass_ctrl_M		0x12
+#define compass_ctrl_4		0x23
+#define compass_fifo_ctrl	0x2E
+
 //##############################################################################
 // global variables
 
-uint8_t data_Read;
+uint16_t data_Read;
 uint8_t address;
 
 //##############################################################################
@@ -167,7 +177,7 @@ void usart1SendInt(int16_t val)
 //##############################################################################
 // writer reader functions
 
-void gyroWrite(uint8_t reg_addr, uint8_t data)
+void gyroWrite(uint8_t reg_addr, uint8_t data, uint8_t dev_addr)
 {
 	twiStart();
 	//if(twiStatus() != TWI_START_SUCCES)
@@ -176,7 +186,7 @@ void gyroWrite(uint8_t reg_addr, uint8_t data)
 		//return;
 	//}
 	
-	twiSendByte(SDS1307_W);
+	twiSendByte(dev_addr);
 	//if(twiStatus() != TWI_ADDR_ACK)
 	//{
 		//usart1SendString("Failed to find device");
@@ -200,7 +210,7 @@ void gyroWrite(uint8_t reg_addr, uint8_t data)
 	twiStop();
 }
 
-void gyroRead(uint8_t addr){
+void gyroRead(uint8_t addr, uint8_t dev_addr, uint8_t dev_addr_r){
 	twiInit();
 	twiStart();
 	//if(twiStatus() != TWI_START_SUCCES)
@@ -208,7 +218,7 @@ void gyroRead(uint8_t addr){
 		//usart1SendString("Failed to init TWI");
 		//return;
 	//}
-	twiSendByte(SDS1307_W);
+	twiSendByte(dev_addr);
 	//if(twiStatus() != TWI_DATA_ACK)
 	//{
 	//usart1SendString("Failed to write data");
@@ -221,7 +231,7 @@ void gyroRead(uint8_t addr){
 	//return;
 	//}
 	twiStart();
-	twiSendByte(SDS1307_R);
+	twiSendByte(dev_addr_r);
 	//if(twiStatus() != TWI_DATA_ACK)
 	//{
 		//usart1SendString("Failed to write data");

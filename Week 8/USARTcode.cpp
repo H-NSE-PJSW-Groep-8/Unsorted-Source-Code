@@ -15,7 +15,7 @@ void writeString(char st[]){
 }
 
 void writeInt(int i){
-	char buffer[8];
+	char buffer[16];
 	itoa(i, buffer, 10);
 	writeString(buffer);
 }
