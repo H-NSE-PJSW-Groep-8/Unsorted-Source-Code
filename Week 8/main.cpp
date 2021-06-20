@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 
-#include "Gyroscoop.cpp"
+#include "i2c.cpp"
 #include "ledIndicator.cpp"
 #include "USARTcode.cpp"
 #include "Encoder.cpp"
@@ -164,14 +164,14 @@ void Gyro(){						//leest Gyroscoopdata en schrijft naar USART
 				writeInt(data_Read);
 				writeString("\t");
 
-				i2cRead(SDS1307_GYRO__H, SDS1307_W, SDS1307_R);
+				i2cRead(SDS1307_GYRO_Z_H, SDS1307_W, SDS1307_R);
 				writeInt(data_Read);
 				gyro_z = data_Read;	//zet gyro_z goed voor uitlezen richting.
 				writeString(" ");
 				
 			writeString("}\n\r");
 }
-
+///
 void compass(){
 			writeString("compass = { ");
 				//i2cRead(0x0F, compass_w, compass_r);
