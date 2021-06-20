@@ -10,9 +10,11 @@
 #include "USARTcode.cpp"
 #include "Encoder.cpp"
 #include "Motor.cpp"
+#include "Windrichting.cpp"
 
 void Gyro();
 void compass();
+void checkTurning();
 
 uint16_t setDuty(int8_t speed);
 
@@ -25,54 +27,16 @@ uint16_t encoderb = 0;
 uint8_t dataint = 0;
 int8_t direction = 0;
 
-int8_t rightturn = 0;
-int8_t leftturn = 0;
-int8_t windrichting = 0;
 
-void writeWind(int8_t i){
-	if (i == 0){
-		writeString("noord");
-	}
-	if (i == 1){
-		writeString("oost");
-	}
-	if (i == 2){
-		writeString("zuid");
-	}
-	if (i == 3){
-		writeString("west");
-	}
-}
-
-void wind(){
-		if (rightturn > 35){
-			windrichting++;
-			rightturn = 0;
-		}
-		if (leftturn > 35){
-			windrichting--;
-			leftturn = 0;
-		}
-		writeWind(windrichting%4);
-}
 
 int main()
 {
-	twiInit();
+	twiInit();					//initialiseer USART, Leds, Motors, I2C, en de Encoder
 	
 	i2cWrite(0x20, 0b1111, SDS1307_W);
 	i2cWrite(SDS1307_CTRL_5, (1<<7),SDS1307_W);
 	i2cWrite(0x20, 0b1111, compass_w);
 	i2cWrite(compass_ctrl_0, (1<<7), compass_w);
-	// i2cWrite(compass_ctrl_M, (1<<1), compass_w);
-	// i2cWrite(compass_ctrl_M, (1<<5), compass_w);
-	// i2cWrite(compass_ctrl_M, (1<<6), compass_w);
-	// i2cWrite(compass_ctrl_M, (1<<7), compass_w);
-	// i2cWrite(compass_ctrl_M, (1<<8), compass_w);
-	// i2cWrite(compass_fifo_ctrl, (1<<6), compass_w);
-	// i2cWrite(compass_fifo_ctrl, (0<<7), compass_w);
-	// i2cWrite(compass_fifo_ctrl, (0<<8), compass_w);
-	//i2cWrite(compass_ctrl_4, (1<<5), compass_w);
 	i2cWrite(compass_ctrl_5, 0b01100100, compass_w);
 	i2cWrite(compass_ctrl_6, 0b00100000, compass_w);
 	i2cWrite(compass_ctrl_7, 0b00000000, compass_w);
@@ -87,15 +51,17 @@ int main()
 	sei();
 	while(1)
 	{
-		//sendDistance();
-		//Gyro();
 		compass();
-		//wind();
+		sendDistance();					//Stuur alle data(afstand en richitng) naar laptop
+		Gyro();
+		checkTurning();
+		writeWind();
+    
 		//dataint = USART_Receive();
 		//USART_Transmit(dataint);
 		
 		//USART_Transmit(dataint);
-		switch (dataint)
+		switch (dataint)				//check voor commands vanaf laptop en voer uit
 		{
 			case 'w':
 			speed = (speed > 3) ? 4 : speed + 1;
@@ -178,7 +144,16 @@ int main()
 	}
 }
 
-void Gyro(){
+void checkTurning(){					//Houd bij of Robot draait adhv de waarde van direction.
+	if (direction != 0){
+		turning = 1;
+	}
+	else{
+		turning = 0;
+	}
+}
+
+void Gyro(){						//leest Gyroscoopdata en schrijft naar USART
 			writeString("Gyro = { ");
 				
 				i2cRead(SDS1307_GYRO_X_H, SDS1307_W, SDS1307_R);
@@ -189,14 +164,9 @@ void Gyro(){
 				writeInt(data_Read);
 				writeString("\t");
 
-				i2cRead(SDS1307_GYRO_Y_H, SDS1307_W, SDS1307_R);
+				i2cRead(SDS1307_GYRO__H, SDS1307_W, SDS1307_R);
 				writeInt(data_Read);
-				if(data_Read > 100){
-					rightturn++;
-				}
-				if(data_Read > 20 & data_Read < 30){
-					leftturn++;
-				}
+				gyro_z = data_Read;	//zet gyro_z goed voor uitlezen richting.
 				writeString(" ");
 				
 			writeString("}\n\r");
@@ -220,6 +190,13 @@ void compass(){
 			writeString("}\n\r");
 }
 
+uint16_t setDuty(int8_t speed)
+{
+	if(!speed) return 0;
+	return (65535/4) * abs(speed);
+}
+
+//ISR's
 ISR(USART1_RX_vect){
 	/* Get and return received data from buffer */
 	//USART_Transmit(UDR1);
@@ -227,11 +204,6 @@ ISR(USART1_RX_vect){
 	UCSR1A = (0 << RXC1) | (0 << TXC1);
 }
 
-uint16_t setDuty(int8_t speed)
-{
-	if(!speed) return 0;
-	return (65535/4) * abs(speed);
-}
 
 ISR(INT6_vect){ //right encoder XOR
 	if(PORTE | (1<<6)) {

@@ -25,6 +25,7 @@
 #define SDS1307_GYRO_Z_L	0x2C
 #define SDS1307_GYRO_Z_H	0x2D
 
+
 #define compass_w			0x3A
 #define compass_r			0x3B
 #define compass_ctrl_0		0x1F
@@ -67,10 +68,11 @@ void usart1SendInt(int16_t val);
 void i2cWrite(uint8_t reg_addr, uint8_t data);
 void i2cRead(uint8_t addr);
 
+
 //##############################################################################
 // twi functions
 
-void twiInit()
+void twiInit()										//initialiseer twi
 {
 	PORTD |= (1<<1) | (1<<0);
 	TWBR = 8;
@@ -83,14 +85,14 @@ void twiStart()
 	while (!(TWCR & (1 << TWINT)));
 }
 
-void twiSendByte(uint8_t byte)
+void twiSendByte(uint8_t byte)						//zet data(byte) in TWDR om verstuurd te worden
 {
 	TWDR = byte;
 	TWCR = (1 << TWINT) | (1 << TWEN);
 	while (!(TWCR & (1 << TWINT)));
 }
 
-void twiReadByte()
+void twiReadByte()							//haalt waarde van TWDR op en zet in data_Read
 {
 	
 	TWCR = (1 << TWINT) | (1 << TWEN);
@@ -148,7 +150,7 @@ void usart1SendInt(int16_t val)
 //##############################################################################
 // writer reader functions
 
-void i2cWrite(uint8_t reg_addr, uint8_t data, uint8_t dev_addr)
+void i2cWrite(uint8_t reg_addr, uint8_t data, uint8_t dev_addr)	//zet data voor de juiste slave adress naar de I2C via twiSendByte()
 {
 	twiStart();
 	//if(twiStatus() != TWI_START_SUCCES)
@@ -158,6 +160,7 @@ void i2cWrite(uint8_t reg_addr, uint8_t data, uint8_t dev_addr)
 	//}
 	
 	twiSendByte(dev_addr);
+
 	//if(twiStatus() != TWI_ADDR_ACK)
 	//{
 		//usart1SendString("Failed to find device");
@@ -181,7 +184,8 @@ void i2cWrite(uint8_t reg_addr, uint8_t data, uint8_t dev_addr)
 	twiStop();
 }
 
-void i2cRead(uint8_t addr, uint8_t dev_addr, uint8_t dev_addr_r){
+
+void i2cRead(uint8_t addr, uint8_t dev_addr, uint8_t dev_addr_r){		//haal gyroscoopdata van de juiste slave adress uit de I2C via twiReadByte()
 	twiInit();
 	twiStart();
 	//if(twiStatus() != TWI_START_SUCCES)
@@ -189,6 +193,7 @@ void i2cRead(uint8_t addr, uint8_t dev_addr, uint8_t dev_addr_r){
 		//usart1SendString("Failed to init TWI");
 		//return;
 	//}
+  
 	twiSendByte(dev_addr);
 	//if(twiStatus() != TWI_DATA_ACK)
 	//{
@@ -203,6 +208,7 @@ void i2cRead(uint8_t addr, uint8_t dev_addr, uint8_t dev_addr_r){
 	//}
 	twiStart();
 	twiSendByte(dev_addr_r);
+
 	//if(twiStatus() != TWI_DATA_ACK)
 	//{
 		//usart1SendString("Failed to write data");
