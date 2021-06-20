@@ -171,7 +171,7 @@ void Gyro(){						//leest Gyroscoopdata en schrijft naar USART
 				
 			writeString("}\n\r");
 }
-///
+
 void compass(){
 			writeString("compass = { ");
 				//i2cRead(0x0F, compass_w, compass_r);

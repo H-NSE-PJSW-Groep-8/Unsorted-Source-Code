@@ -117,37 +117,6 @@ void twiStop()
 }
 
 //##############################################################################
-// usart1 functions
-
-void usart1Init()
-{
-	UBRR1H = 0;
-	UBRR1L = 103;
-	UCSR1B |= (1 << RXEN1) | (1 << TXEN1);
-	UCSR1C |= (1 << UCSZ10) | (1 << UCSZ11);
-}
-
-void usart1SendChar(char x)
-{
-	while (!(UCSR1A & (1 << UDRE1)));
-	UDR1 = x;
-}
-
-void usart1SendString(const char st[])
-{
-	uint8_t i;
-	for (i = 0 ; st[i] != 0 ; i++)
-	usart1SendChar(st[i]);
-}
-
-void usart1SendInt(int16_t val)
-{
-	char buffer[8];
-	itoa(val, buffer, 10);
-	usart1SendString(buffer);
-}
-
-//##############################################################################
 // writer reader functions
 
 void i2cWrite(uint8_t reg_addr, uint8_t data, uint8_t dev_addr)	//zet data voor de juiste slave adress naar de I2C via twiSendByte()
