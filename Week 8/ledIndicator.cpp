@@ -4,7 +4,7 @@ void ledIndicatorInit();
 void ledIndicatorActive();
 void ledIndicatorIdle();
 
-void ledIndicatorInit()
+void ledIndicatorInit()					//initialiseer de led
 {
 DDRC |= (1<<7);
 TC4H = 977>>8;
@@ -15,13 +15,13 @@ TCCR4B |= (0x0F);
 ledIndicatorIdle();
 }
 
-void ledIndicatorActive()
+void ledIndicatorActive()				//zet led aan
 {
 TC4H = 977>>8;
 OCR4A = (uint8_t)977;
 }
 
-void ledIndicatorIdle()
+void ledIndicatorIdle()				//zet led uit
 {
 TC4H = 244>>8;
 OCR4A = (uint8_t)244;
