@@ -30,7 +30,7 @@ int8_t direction = 0;
 
 int main()
 {
-	twiInit();
+	twiInit();					//initialiseer USART, Leds, Motors, I2C, en de Encoder
 	
 	gyroWrite(0x20, 0b1111);
 	gyroWrite(SDS1307_CTRL_5, (1<<7));
@@ -45,7 +45,7 @@ int main()
 	sei();
 	while(1)
 	{
-		sendDistance();
+		sendDistance();					//Stuur alle data(afstand en richitng) naar laptop
 		Gyro();
 		checkTurning();
 		writeWind();
@@ -54,7 +54,7 @@ int main()
 		//USART_Transmit(dataint);
 		
 		//USART_Transmit(dataint);
-		switch (dataint)
+		switch (dataint)				//check voor commands vanaf laptop en voer uit
 		{
 			case 'w':
 			speed = (speed > 3) ? 4 : speed + 1;
@@ -137,7 +137,7 @@ int main()
 	}
 }
 
-void checkTurning(){
+void checkTurning(){					//Houd bij of Robot draait adhv de waarde van direction.
 	if (direction != 0){
 		turning = 1;
 	}
@@ -146,7 +146,7 @@ void checkTurning(){
 	}
 }
 
-void Gyro(){
+void Gyro(){						//leest Gyroscoopdata en schrijft naar USART
 			writeString("Gyro = { ");
 				
 				gyroRead(SDS1307_GYRO_X_H);
@@ -159,11 +159,19 @@ void Gyro(){
 
 				gyroRead(SDS1307_GYRO_Z_H);
 				writeInt(data_Read);
-				gyro_z = data_Read;
+				gyro_z = data_Read;	//zet gyro_z goed voor uitlezen richting.
 				writeString(" ");
 				
 			writeString("}\n\r");
 }
+
+uint16_t setDuty(int8_t speed)
+{
+	if(!speed) return 0;
+	return (65535/4) * abs(speed);
+}
+
+//ISR's
 
 ISR(USART1_RX_vect){
 	/* Get and return received data from buffer */
@@ -172,11 +180,6 @@ ISR(USART1_RX_vect){
 	UCSR1A = (0 << RXC1) | (0 << TXC1);
 }
 
-uint16_t setDuty(int8_t speed)
-{
-	if(!speed) return 0;
-	return (65535/4) * abs(speed);
-}
 
 ISR(INT6_vect){ //right encoder XOR
 	if(PORTE | (1<<6)) {
