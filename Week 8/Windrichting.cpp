@@ -8,7 +8,7 @@ uint8_t gyro_z;
 
 
 
-void writeWind(){								//leest gyro_z uit en verandert de waarde van turning op basis van die data. Output is writeString(windrichting)
+void writeWind(){								//leest gyro_z en verandert de waarde van turning op basis van die data. Output is writeString(windrichting)
 	if((gyro_z > 190) & turning){
 		turn++;
 	}
@@ -23,7 +23,7 @@ void writeWind(){								//leest gyro_z uit en verandert de waarde van turning o
 		turn = turn + 76;
 	}
 	
-	if ((turn > 66) || (turn <= 9)){
+	if ((turn > 66) || (turn <= 9)){					//check waarde van turn(dwz de mate van draaiing ten opzicht van beginstand), en output juiste 'windrichting'
 		writeString("noord");
 	}
 	if ((turn > 9) & (turn <= 28)){
