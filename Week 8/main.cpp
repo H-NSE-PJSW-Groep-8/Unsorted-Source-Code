@@ -32,8 +32,8 @@ int main()
 {
 	twiInit();					//initialiseer USART, Leds, Motors, I2C, en de Encoder
 	
-	gyroWrite(0x20, 0b1111);
-	gyroWrite(SDS1307_CTRL_5, (1<<7));
+	i2cWrite(0x20, 0b1111);
+	i2cWrite(SDS1307_CTRL_5, (1<<7));
 	
 	//char udata;
 	USART_Init();
@@ -149,15 +149,15 @@ void checkTurning(){					//Houd bij of Robot draait adhv de waarde van direction
 void Gyro(){						//leest Gyroscoopdata en schrijft naar USART
 			writeString("Gyro = { ");
 				
-				gyroRead(SDS1307_GYRO_X_H);
+				i2cRead(SDS1307_GYRO_X_H);
 				writeInt(data_Read);
 				writeString("\t");
 
-				gyroRead(SDS1307_GYRO_Y_H);
+				i2cRead(SDS1307_GYRO_Y_H);
 				writeInt(data_Read);
 				writeString("\t");
 
-				gyroRead(SDS1307_GYRO_Z_H);
+				i2cRead(SDS1307_GYRO_Z_H);
 				writeInt(data_Read);
 				gyro_z = data_Read;	//zet gyro_z goed voor uitlezen richting.
 				writeString(" ");
