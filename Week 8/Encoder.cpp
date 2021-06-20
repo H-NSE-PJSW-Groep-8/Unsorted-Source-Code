@@ -8,7 +8,7 @@ void dist();
 static volatile uint16_t count = 0;
 static volatile uint16_t distance = 0;
 
-void sendDistance(){
+void sendDistance(){			//stuurt distance + " CM" via USART naar laptop
 	//if(count % 50 == 0){
 	writeInt(distance);
 	writeString(" Cm");
@@ -17,7 +17,7 @@ void sendDistance(){
 	//}
 }
 
-void setDistance(){
+void setDistance(){			// distance = afstand in cm, en count = tellen uit de encoder. count wordt na x keer tellen omgezet in distance 
 	if(count % 50 == 0){
 		distance++;
 	}
@@ -30,7 +30,7 @@ void dist()
 }
 
 
-void initEncoder(){
+void initEncoder(){			// initialiseer encoders, zet count op 0
 	
 	PCICR = (1<<PCIE0);
 	PCMSK0 = (1<<PCINT4);
