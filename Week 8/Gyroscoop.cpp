@@ -89,7 +89,7 @@ void gyroRead(uint8_t addr);
 //##############################################################################
 // twi functions
 
-void twiInit()
+void twiInit()										//initialiseer twi
 {
 	PORTD |= (1<<1) | (1<<0);
 	TWBR = 8;
@@ -102,14 +102,14 @@ void twiStart()
 	while (!(TWCR & (1 << TWINT)));
 }
 
-void twiSendByte(uint8_t byte)
+void twiSendByte(uint8_t byte)						//zet data(byte) in TWDR om verstuurd te worden
 {
 	TWDR = byte;
 	TWCR = (1 << TWINT) | (1 << TWEN);
 	while (!(TWCR & (1 << TWINT)));
 }
 
-void twiReadByte()
+void twiReadByte()							//haalt waarde van TWDR op en zet in data_Read
 {
 	
 	TWCR = (1 << TWINT) | (1 << TWEN);
@@ -167,7 +167,7 @@ void usart1SendInt(int16_t val)
 //##############################################################################
 // writer reader functions
 
-void gyroWrite(uint8_t reg_addr, uint8_t data)
+void gyroWrite(uint8_t reg_addr, uint8_t data)		//zet data voor de juiste slave adress naar de I2C via twiSendByte()
 {
 	twiStart();
 	//if(twiStatus() != TWI_START_SUCCES)
@@ -200,7 +200,7 @@ void gyroWrite(uint8_t reg_addr, uint8_t data)
 	twiStop();
 }
 
-void gyroRead(uint8_t addr){
+void gyroRead(uint8_t addr){			//haal gyroscoopdata van de juiste slave adress uit de I2C via twiReadByte()
 	twiInit();
 	twiStart();
 	//if(twiStatus() != TWI_START_SUCCES)
