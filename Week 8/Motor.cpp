@@ -5,7 +5,7 @@ void motorControlRight(uint8_t dir, uint16_t power);
 void motorControlLeft(uint8_t dir, uint16_t power);
 void motorStop();
 
-void motorPwmInit()
+void motorPwmInit()											//initialiseer de motors
 {
 	// timer init PWM_freq = clk_io / (prescaler * TOP)
 	ICR1 = 0xFFFF;
@@ -16,7 +16,7 @@ void motorPwmInit()
 	DDRB |= (1<<6) | (1<<5) | (1<<2) | (1<<1);
 }
 
-void motorControlRight(uint8_t dir, uint16_t power)
+void motorControlRight(uint8_t dir, uint16_t power)				//zet richting(dir) en snelheid(power) voor de rechtermotor 
 {
 	if(dir) PORTB |= (1<<1);
 	else PORTB &= ~(1<<1);
@@ -32,7 +32,7 @@ void motorControlRight(uint8_t dir, uint16_t power)
 	}
 }
 
-void motorControlLeft(uint8_t dir, uint16_t power)
+void motorControlLeft(uint8_t dir, uint16_t power)				//zet richting(dir) en snelheid(power) voor de linkermotor 
 {
 	if(dir) PORTB |= (1<<2);
 	else PORTB &= ~(1<<2);
