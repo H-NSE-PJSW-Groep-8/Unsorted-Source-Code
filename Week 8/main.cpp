@@ -13,6 +13,7 @@
 #include "Windrichting.cpp"
 
 void Gyro();
+void compass();
 void checkTurning();
 
 uint16_t setDuty(int8_t speed);
@@ -32,8 +33,13 @@ int main()
 {
 	twiInit();					//initialiseer USART, Leds, Motors, I2C, en de Encoder
 	
-	i2cWrite(0x20, 0b1111);
-	i2cWrite(SDS1307_CTRL_5, (1<<7));
+	i2cWrite(0x20, 0b1111, SDS1307_W);
+	i2cWrite(SDS1307_CTRL_5, (1<<7),SDS1307_W);
+	i2cWrite(0x20, 0b1111, compass_w);
+	i2cWrite(compass_ctrl_0, (1<<7), compass_w);
+	i2cWrite(compass_ctrl_5, 0b01100100, compass_w);
+	i2cWrite(compass_ctrl_6, 0b00100000, compass_w);
+	i2cWrite(compass_ctrl_7, 0b00000000, compass_w);
 	
 	//char udata;
 	USART_Init();
@@ -45,11 +51,12 @@ int main()
 	sei();
 	while(1)
 	{
+		compass();
 		sendDistance();					//Stuur alle data(afstand en richitng) naar laptop
 		Gyro();
 		checkTurning();
 		writeWind();
-
+    
 		//dataint = USART_Receive();
 		//USART_Transmit(dataint);
 		
@@ -149,17 +156,35 @@ void checkTurning(){					//Houd bij of Robot draait adhv de waarde van direction
 void Gyro(){						//leest Gyroscoopdata en schrijft naar USART
 			writeString("Gyro = { ");
 				
-				i2cRead(SDS1307_GYRO_X_H);
+				i2cRead(SDS1307_GYRO_X_H, SDS1307_W, SDS1307_R);
 				writeInt(data_Read);
 				writeString("\t");
 
-				i2cRead(SDS1307_GYRO_Y_H);
+				i2cRead(SDS1307_GYRO_Y_H, SDS1307_W, SDS1307_R);
 				writeInt(data_Read);
 				writeString("\t");
 
-				i2cRead(SDS1307_GYRO_Z_H);
+				i2cRead(SDS1307_GYRO__H, SDS1307_W, SDS1307_R);
 				writeInt(data_Read);
 				gyro_z = data_Read;	//zet gyro_z goed voor uitlezen richting.
+				writeString(" ");
+				
+			writeString("}\n\r");
+}
+
+void compass(){
+			writeString("compass = { ");
+				//i2cRead(0x0F, compass_w, compass_r);
+				i2cRead(compass_out_x_H, compass_w, compass_r);
+				 writeInt(data_Read);
+				 writeString("\t");
+
+				i2cRead(compass_out_y_H, compass_w, compass_r);
+				writeInt(data_Read);
+				writeString("\t");
+
+				i2cRead(compass_out_z_H, compass_w, compass_r);
+				writeInt(data_Read);
 				writeString(" ");
 				
 			writeString("}\n\r");
@@ -172,7 +197,6 @@ uint16_t setDuty(int8_t speed)
 }
 
 //ISR's
-
 ISR(USART1_RX_vect){
 	/* Get and return received data from buffer */
 	//USART_Transmit(UDR1);
