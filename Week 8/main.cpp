@@ -111,9 +111,7 @@ int main()
 			winden = 0;
 			break;
 			case 'x':
-			if (disten == 0){
-				disten = 1;
-			}
+			disten = 1;
 			break;
 			case 'c':
 			disten = 0;
