@@ -26,6 +26,10 @@ uint16_t encodera = 0;
 uint16_t encoderb = 0;
 uint8_t dataint = 0;
 int8_t direction = 0;
+uint8_t compassen = 0;
+int gyroen = 0;
+uint8_t winden = 0;
+uint8_t disten = 0;
 
 
 
@@ -40,7 +44,6 @@ int main()
 	i2cWrite(compass_ctrl_5, 0b01100100, compass_w);
 	i2cWrite(compass_ctrl_6, 0b00100000, compass_w);
 	i2cWrite(compass_ctrl_7, 0b00000000, compass_w);
-	
 	//char udata;
 	USART_Init();
 	ledIndicatorInit();
@@ -51,11 +54,6 @@ int main()
 	sei();
 	while(1)
 	{
-		compass();
-		sendDistance();					//Stuur alle data(afstand en richitng) naar laptop
-		Gyro();
-		checkTurning();
-		writeWind();
     
 		//dataint = USART_Receive();
 		//USART_Transmit(dataint);
@@ -94,6 +92,31 @@ int main()
 			direction = 0;
 			speed = 0;
 			break;
+			case 'p':
+			if (compassen == 0){
+				compassen = 1;
+			}
+			else {compassen = 0;}
+			break;
+			case 'g':
+			gyroen = 1;
+			break;
+			case 'h':
+			gyroen = 0;
+			break;
+			case 'k':
+			winden = 1;
+			break;
+			case 'l':
+			winden = 0;
+			break;
+			case 'x':
+			if (disten == 0){
+				disten = 1;
+			}
+			break;
+			case 'c':
+			disten = 0;
 			default:
 			break;
 		}
@@ -140,6 +163,19 @@ int main()
 				motorControlRight(motor_dir, duty);
 				break;
 			}
+		}
+		if(compassen == 1){
+			compass();
+		}
+		if (disten == 1){
+		sendDistance();	//Stuur alle data(afstand en richitng) naar laptop
+		}
+		if (gyroen == 1){
+			Gyro();
+		}
+		checkTurning();
+		if (winden == 1){
+			writeWind();
 		}
 	}
 }
