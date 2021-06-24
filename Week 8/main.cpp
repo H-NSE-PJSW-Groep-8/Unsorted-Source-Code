@@ -93,10 +93,10 @@ int main()
 			speed = 0;
 			break;
 			case 'p':
-			if (compassen == 0){
-				compassen = 1;
-			}
-			else {compassen = 0;}
+			compassen = 1;
+			break;
+			case '[':
+			compassen = 0;
 			break;
 			case 'g':
 			gyroen = 1;
